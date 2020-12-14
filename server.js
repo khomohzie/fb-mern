@@ -16,6 +16,18 @@ Grid.mongo = mongoose.mongo
 const app = express()
 const port = process.env.PORT || 9000
 
+const pusher = new Pusher({
+  appId: "1122990",
+  key: "f5db2c36a6e8c7347002",
+  secret: "06735fdb0f1bb7136a96",
+  cluster: "us3",
+  useTLS: true
+});
+
+pusher.trigger("my-channel", "my-event", {
+  message: "hello world"
+});
+
 // middlewares
 app.use(bodyParser.json());
 app.use(cors());
@@ -28,6 +40,24 @@ const conn = mongoose.createConnection(mongoURI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 });
+
+mongoose.connection.once('open', () => {
+    console.log('DB Connected');
+
+    const changeStream = mongoose.connection.collection('posts').watch()
+
+    changeStream.on('change', (change) => {
+        if (change.operationType === 'insert') {
+            console.log("Triggering Pusher");
+
+            pusher.trigger('posts', 'inserted', {
+                change: change
+            })
+        } else {
+            console.log("Error triggering Pusher");
+        }
+    })
+})
 
 let gfs;
 
@@ -97,8 +127,8 @@ app.get('/retrieve/posts', (req, res) => {
     })
 })
 
-app.get('/retrieve/images/single', (req, res) => {
-    gfs.files.findOne({filename: req.query.name}, (err, data) => {
+app.get('/retrieve/image/single', (req, res) => {
+    gfs.files.findOne({filename: req.query.name}, (err, file) => {
         if (err) {
             res.status(500).send(err)
         } else {

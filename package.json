@@ -1,7 +1,7 @@
 {
   "name": "fb-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "MERN FB Backend project",
   "main": "server.js",
   "type": "module",
   "scripts": {
