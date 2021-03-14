@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 import express from 'express';
 import mongoose from 'mongoose'
 import cors from 'cors'
@@ -18,8 +20,8 @@ const port = process.env.PORT || 9000
 
 const pusher = new Pusher({
   appId: "1122990",
-  key: "f5db2c36a6e8c7347002",
-  secret: "06735fdb0f1bb7136a96",
+  key: process.env.PUSHER_KEY,
+  secret: process.env.PUSHER_SECRET,
   cluster: "us3",
   useTLS: true
 });
@@ -33,7 +35,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // db config
-const mongoURI = "mongodb+srv://fbclient:Fa6cBJQ9YAEwr7vJ@cluster0.aqa4u.mongodb.net/facebook-db?retryWrites=true&w=majority"
+const mongoURI = process.env.MONGO_URI
 
 const conn = mongoose.createConnection(mongoURI, {
     useCreateIndex: true,
